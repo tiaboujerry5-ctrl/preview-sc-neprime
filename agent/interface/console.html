@@ -1,0 +1,568 @@
+<title>PRIME Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;450;500;600&display=swap">
+<style>
+  :root{
+    --ink:#1A1D23; --paper:#F1F4F7; --surface:#FFFFFF; --surface-2:#E8ECF1;
+    --muted:#626C7A; --line:#D3DAE2; --line-soft:#E3E8EE;
+    --accent:#6B2D5C; --accent-ink:#FFFFFF; --accent-wash:#F3E9F0;
+    --good:#1F7A54; --warn:#8A5A0B; --bad:#A32C28;
+    --good-wash:#E6F2EC; --warn-wash:#F7EFE0; --bad-wash:#F8E9E8;
+    --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --serif:"Newsreader",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --r:10px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ink:#E4E8ED; --paper:#131519; --surface:#1B1E24; --surface-2:#23272E;
+      --muted:#97A1AE; --line:#31363F; --line-soft:#272C33;
+      --accent:#D18BBE; --accent-ink:#1B1E24; --accent-wash:#2A1F28;
+      --good:#5FBE92; --warn:#D2A353; --bad:#E08480;
+      --good-wash:#18261F; --warn-wash:#292217; --bad-wash:#2B1B1A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E4E8ED; --paper:#131519; --surface:#1B1E24; --surface-2:#23272E;
+    --muted:#97A1AE; --line:#31363F; --line-soft:#272C33;
+    --accent:#D18BBE; --accent-ink:#1B1E24; --accent-wash:#2A1F28;
+    --good:#5FBE92; --warn:#D2A353; --bad:#E08480;
+    --good-wash:#18261F; --warn-wash:#292217; --bad-wash:#2B1B1A;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:var(--sans); font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding-inline:16px; padding-block:0 56px}
+
+  /* ---------- 1. ASK ---------- */
+  .askbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line-soft);
+    padding-block:14px 12px;
+  }
+  .brandrow{display:flex; align-items:baseline; gap:10px; margin-bottom:10px; flex-wrap:wrap}
+  .brand{
+    font-family:var(--serif); font-size:20px; font-weight:600; letter-spacing:.01em;
+  }
+  .brand em{font-style:normal; color:var(--accent)}
+  .tagline{font-size:12px; color:var(--muted); font-family:var(--mono)}
+  .lvl{
+    margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--muted);
+    border:1px solid var(--line); border-radius:999px; padding:2px 9px; white-space:nowrap;
+  }
+
+  .inputrow{display:flex; gap:8px; align-items:flex-end}
+  .field{
+    flex:1; display:flex; flex-direction:column; background:var(--surface);
+    border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+    transition:border-color .15s;
+  }
+  .field:focus-within{border-color:var(--accent)}
+  textarea#ask{
+    width:100%; border:0; outline:0; resize:none; background:transparent; color:var(--ink);
+    font-family:var(--sans); font-size:15px; line-height:1.5; padding:11px 12px; min-height:44px;
+    max-height:160px; field-sizing:content;
+  }
+  textarea#ask::placeholder{color:var(--muted)}
+  .fieldfoot{
+    display:none; align-items:center; gap:8px; padding:0 12px 9px;
+    font-family:var(--mono); font-size:11px; color:var(--warn);
+  }
+  .fieldfoot.on{display:flex}
+
+  button{font-family:inherit; font-size:inherit; cursor:pointer}
+  .mic,.go{
+    height:44px; border-radius:var(--r); border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); display:grid; place-items:center;
+    transition:background .15s,border-color .15s,color .15s;
+  }
+  .mic{width:44px}
+  .mic:hover,.go:hover{border-color:var(--accent)}
+  .mic[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+  .mic[aria-pressed="true"] .pulse{animation:pulse 1.15s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+  .mic:disabled{opacity:.4; cursor:not-allowed}
+  .go{padding:0 16px; font-weight:500}
+  .go:disabled{opacity:.45; cursor:not-allowed}
+  :is(button,textarea,a):focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  .listening{
+    display:none; margin-top:8px; font-family:var(--mono); font-size:11.5px; color:var(--muted);
+    align-items:center; gap:7px;
+  }
+  .listening.on{display:flex}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--bad);animation:pulse 1.15s ease-in-out infinite}
+
+  /* ---------- 2. LIVE STATE ---------- */
+  .phases{
+    display:none; gap:0; margin-top:16px; border:1px solid var(--line);
+    border-radius:var(--r); background:var(--surface); overflow:hidden;
+  }
+  .phases.on{display:block}
+  .phhead{
+    display:flex; align-items:center; gap:8px; padding:10px 13px;
+    border-bottom:1px solid var(--line-soft); font-family:var(--mono); font-size:11.5px;
+  }
+  .spin{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.15s ease-in-out infinite}
+  .phlist{display:flex; flex-wrap:wrap; gap:0}
+  .ph{
+    flex:1 1 120px; padding:10px 13px; border-right:1px solid var(--line-soft);
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+    display:flex; align-items:center; gap:7px;
+  }
+  .ph:last-child{border-right:0}
+  .ph .mark{width:13px; display:inline-block; text-align:center}
+  .ph.done{color:var(--good)}
+  .ph.active{color:var(--ink)}
+
+  /* ---------- section headers ---------- */
+  .shead{
+    display:flex; align-items:baseline; gap:10px; margin:30px 0 11px;
+    padding-bottom:7px; border-bottom:1px solid var(--line);
+  }
+  .shead h2{
+    margin:0; font-family:var(--mono); font-size:11px; font-weight:500;
+    letter-spacing:.11em; text-transform:uppercase; color:var(--muted);
+  }
+  .shead .meta{margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--muted)}
+
+  /* ---------- 3. DOSSIER ---------- */
+  .notice{
+    display:none; margin-top:16px; padding:11px 13px; border-radius:var(--r);
+    background:var(--warn-wash); border:1px solid color-mix(in srgb,var(--warn) 35%, transparent);
+    font-size:13.5px; line-height:1.5;
+  }
+  .notice.on{display:block}
+  .notice b{font-weight:600}
+
+  .dossier{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+  .dtop{padding:17px 18px 16px; border-bottom:1px solid var(--line-soft)}
+  .brief{
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+    letter-spacing:.02em; margin-bottom:9px;
+  }
+  .pickname{
+    font-family:var(--serif); font-size:25px; line-height:1.2; font-weight:600;
+    margin:0 0 4px; text-wrap:balance;
+  }
+  .pricerow{display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; margin-bottom:11px}
+  .price{font-family:var(--mono); font-size:19px; font-weight:500; font-variant-numeric:tabular-nums; color:var(--accent)}
+  .seller{font-size:13px; color:var(--muted)}
+  .rationale{margin:0; font-size:14.5px; line-height:1.6; max-width:62ch}
+
+  .dsec{padding:15px 18px; border-bottom:1px solid var(--line-soft)}
+  .dsec:last-child{border-bottom:0}
+  .dlabel{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:10px;
+  }
+
+  .alt{display:flex; gap:12px; align-items:baseline; padding:8px 0; border-top:1px solid var(--line-soft)}
+  .alt:first-of-type{border-top:0; padding-top:0}
+  .alt .an{font-weight:500; font-size:14px}
+  .alt .ap{font-family:var(--mono); font-size:13px; font-variant-numeric:tabular-nums; margin-left:auto; white-space:nowrap; color:var(--muted)}
+  .axis{display:block; font-size:12.5px; color:var(--muted); margin-top:2px}
+  .axis b{color:var(--ink); font-weight:500}
+
+  ul.plain{margin:0; padding:0; list-style:none}
+  ul.plain li{
+    padding:7px 0 7px 16px; position:relative; font-size:13.5px; line-height:1.5;
+    border-top:1px solid var(--line-soft);
+  }
+  ul.plain li:first-child{border-top:0}
+  ul.plain li::before{
+    content:""; position:absolute; left:2px; top:15px; width:5px; height:5px;
+    border-radius:1px; background:var(--muted);
+  }
+  .risk li::before{background:var(--warn)}
+  .risk li b{color:var(--warn); font-weight:600}
+  .cut li{color:var(--muted)}
+  .near li::before{background:var(--accent)}
+
+  .timing{
+    display:flex; gap:10px; align-items:flex-start; padding:12px 18px;
+    background:var(--good-wash); border-bottom:1px solid var(--line-soft);
+    font-size:13.5px; line-height:1.5;
+  }
+  .timing .tg{font-family:var(--mono); font-size:11px; font-weight:500; color:var(--good); text-transform:uppercase; letter-spacing:.09em; padding-top:2px; white-space:nowrap}
+
+  .foot{
+    padding:12px 18px; background:var(--surface-2);
+    font-family:var(--mono); font-size:11px; color:var(--muted); line-height:1.7;
+  }
+  .foot span{display:block}
+
+  /* ---------- 4. PAST + VERDICT ---------- */
+  .ep{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:13px 15px; margin-bottom:9px;
+  }
+  .eprow{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+  .epname{font-weight:500; font-size:14.5px}
+  .epage{font-family:var(--mono); font-size:11px; color:var(--muted); margin-left:auto}
+  .epsub{font-size:12.5px; color:var(--muted); margin-top:1px}
+  .taps{display:flex; gap:7px; margin-top:11px; flex-wrap:wrap}
+  .tap{
+    border:1px solid var(--line); background:transparent; color:var(--ink);
+    border-radius:999px; padding:5px 13px; font-size:12.5px; transition:all .14s;
+  }
+  .tap:hover{border-color:var(--accent); color:var(--accent)}
+  .tap[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+  .signal{
+    display:none; margin-top:10px; padding:8px 11px; border-radius:7px;
+    background:var(--accent-wash); font-family:var(--mono); font-size:11px; line-height:1.6;
+  }
+  .signal.on{display:block}
+  .signal b{color:var(--accent)}
+  .resolved{
+    display:inline-flex; align-items:center; gap:5px; font-family:var(--mono);
+    font-size:11px; color:var(--good); background:var(--good-wash);
+    border-radius:999px; padding:3px 10px; margin-top:9px;
+  }
+
+  .why{
+    margin-top:12px; font-size:12.5px; color:var(--muted); line-height:1.6;
+    padding:11px 13px; border-left:2px solid var(--accent); background:var(--surface);
+    border-radius:0 var(--r) var(--r) 0;
+  }
+  .why b{color:var(--ink); font-weight:500}
+
+  .endnote{
+    margin-top:26px; padding-top:16px; border-top:1px solid var(--line);
+    font-size:12.5px; color:var(--muted); line-height:1.65;
+  }
+  .endnote code{font-family:var(--mono); font-size:11.5px; background:var(--surface-2); padding:1px 5px; border-radius:4px}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important; transition:none!important}
+  }
+  @media (max-width:430px){
+    .pickname{font-size:22px}
+    .ph{flex:1 1 100%; border-right:0; border-bottom:1px solid var(--line-soft)}
+    .ph:last-child{border-bottom:0}
+  }
+</style>
+
+<div class="wrap">
+
+  <!-- 1 · ASK -->
+  <div class="askbar">
+    <div class="brandrow">
+      <span class="brand">P<em>R</em>IME</span>
+      <span class="tagline">research alter ego</span>
+      <span class="lvl">L1 · advisory</span>
+    </div>
+    <div class="inputrow">
+      <div class="field">
+        <textarea id="ask" rows="1" placeholder="What are you looking for?" aria-label="Your request"></textarea>
+        <div class="fieldfoot" id="fieldfoot">↑ check the transcript before sending</div>
+      </div>
+      <button class="mic" id="mic" aria-pressed="false" aria-label="Dictate" title="Hold a thought — tap to dictate">
+        <svg class="pulse" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/>
+        </svg>
+      </button>
+      <button class="go" id="go" disabled>Ask</button>
+    </div>
+    <div class="listening" id="listening"><span class="dot"></span><span id="listenTxt">listening…</span></div>
+  </div>
+
+  <!-- 2 · LIVE STATE -->
+  <div class="phases" id="phases">
+    <div class="phhead"><span class="spin"></span><span id="phnow">reading the brief…</span></div>
+    <div class="phlist">
+      <div class="ph" data-ph="0"><span class="mark">○</span>brief</div>
+      <div class="ph" data-ph="1"><span class="mark">○</span>research</div>
+      <div class="ph" data-ph="2"><span class="mark">○</span>skeptic</div>
+      <div class="ph" data-ph="3"><span class="mark">○</span>dossier</div>
+    </div>
+  </div>
+
+  <div class="notice" id="notice">
+    <b>Shell only.</b> Phases 2–3 aren’t wired to real research yet — this build proves the
+    layout, the voice path and verdict capture. The dossier below is the worked example
+    from <code>memory/episodes/</code>, with invented products and prices.
+  </div>
+
+  <!-- 3 · DOSSIER -->
+  <div class="shead">
+    <h2>Dossier</h2>
+    <span class="meta">episode 2026-09-17</span>
+  </div>
+
+  <article class="dossier">
+    <div class="dtop">
+      <div class="brief">unlined · over a knit · light rain · ≤ €260 · by 15 Oct</div>
+      <h3 class="pickname">Northmoor Waxed Chore Jacket</h3>
+      <div class="pricerow">
+        <span class="price">€210</span>
+        <span class="seller">northmoor.eu · brand-direct · 14-day returns</span>
+      </div>
+      <p class="rationale">
+        Waxed cotton is the only thing in range that handles Paris drizzle without reading
+        technical, and it’s cut a full size generous — which matters because you said “over a
+        knit.” Nine sizing reports agree it’s true-to-size <em>with</em> a mid-gauge layer.
+      </p>
+    </div>
+
+    <div class="dsec">
+      <div class="dlabel">Alternates</div>
+      <div class="alt">
+        <div>
+          <span class="an">Ardent Cotton Overshirt</span>
+          <span class="axis"><b>Cheaper by €70</b>, but unwaxed — it’s a dry-day jacket.</span>
+        </div>
+        <span class="ap">€140</span>
+      </div>
+      <div class="alt">
+        <div>
+          <span class="an">Volebrook Field Jacket</span>
+          <span class="axis"><b>Better shell</b> (4-ply, lifetime rewax), but €35 over your walk-away and a 6-week wait.</span>
+        </div>
+        <span class="ap">€295</span>
+      </div>
+    </div>
+
+    <div class="dsec">
+      <div class="dlabel">What would make this wrong</div>
+      <ul class="plain risk">
+        <li>Waxed cotton needs rewaxing every ~2 seasons and transfers wax onto light fabrics for the first month. If that’s annoying, the pick is wrong — not defective, just not for you. <b>Likelihood: moderate.</b></li>
+        <li>Returns run 14 days from <b>delivery</b>, not order. Passes your floor by zero margin.</li>
+      </ul>
+    </div>
+
+    <div class="dsec">
+      <div class="dlabel">Considered and cut</div>
+      <ul class="plain cut">
+        <li><b>Haversack Field</b> — no M until November, past your deadline.</li>
+        <li><b>Corso Nylon Shell</b> — polyester; reads technical over knitwear. Was the top scorer until the skeptic pass killed it.</li>
+        <li><b>Bellweather Chore</b> — €89, but 3-star reviews cluster on seams failing at 6 months.</li>
+      </ul>
+    </div>
+
+    <div class="dsec">
+      <div class="dlabel">One thing away</div>
+      <ul class="plain near">
+        <li><b>Volebrook Field Jacket</b> would qualify if the ceiling moved €35. Materially better shell — worth knowing before you call the ceiling final.</li>
+      </ul>
+    </div>
+
+    <div class="timing">
+      <span class="tg">Buy now</span>
+      <span>Waxed outerwear bottoms out in <b>February</b>, not autumn. Waiting costs you the season and saves maybe 15%.</span>
+    </div>
+
+    <div class="foot">
+      <span>assumed · €180 target · fits over a mid-gauge knit · light shower resistance · smart-casual</span>
+      <span>prices checked · 2026-09-17 09:41 UTC · 3 independent sources · 90-day median €215 · floor €189</span>
+    </div>
+  </article>
+
+  <!-- 4 · PAST + VERDICT -->
+  <div class="shead">
+    <h2>Past</h2>
+    <span class="meta">3 episodes · 1 resolved</span>
+  </div>
+
+  <div class="ep" data-ep="jacket">
+    <div class="eprow"><span class="epname">Fall jacket</span><span class="epage">12d ago</span></div>
+    <div class="epsub">Northmoor Waxed Chore · €210</div>
+    <div class="taps">
+      <button class="tap" data-v="kept">Kept it</button>
+      <button class="tap" data-v="returned">Sent it back</button>
+      <button class="tap" data-v="skipped">Didn’t buy</button>
+    </div>
+    <div class="signal"></div>
+  </div>
+
+  <div class="ep" data-ep="desk">
+    <div class="eprow"><span class="epname">Standing desk</span><span class="epage">40d ago</span></div>
+    <div class="epsub">Oakfield 140cm · €430</div>
+    <div class="taps">
+      <button class="tap" data-v="kept">Kept it</button>
+      <button class="tap" data-v="returned">Sent it back</button>
+      <button class="tap" data-v="skipped">Didn’t buy</button>
+    </div>
+    <div class="signal"></div>
+  </div>
+
+  <div class="ep" data-ep="plumber">
+    <div class="eprow"><span class="epname">Bathroom leak — 3 quotes</span><span class="epage">2mo ago</span></div>
+    <div class="epsub">Marchand Plomberie · €340 · licensed, insured, written quote</div>
+    <div class="resolved">✓ kept · signal logged at 1.0</div>
+  </div>
+
+  <div class="why">
+    <b>Why three taps and not a form.</b> You chose to volunteer outcomes rather than be
+    asked on a schedule, so this is the cheapest possible way to close the loop —
+    <code>kept_and_reused</code> is the strongest signal in the system and it costs you half a
+    second here. Without it, confidence stalls around 0.5 and he plateaus.
+  </div>
+
+  <div class="endnote">
+    Voice uses the browser’s built-in recognition, behind a one-function interface so
+    swapping in server-side transcription later is a single file. The transcript always lands
+    in the box for you to read before it sends — voice that mishears a brand name and fires
+    anyway is voice you stop using. Not supported in Firefox; the mic disables itself there
+    rather than pretending.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- voice: the whole abstraction ---------- */
+  function createVoice(){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return null;
+    var rec = new SR();
+    rec.continuous = true; rec.interimResults = true; rec.lang = "en-US";
+    return {
+      onPartial:null, onFinal:null, onEnd:null,
+      start:function(){ try{ rec.start(); }catch(e){} },
+      stop:function(){ try{ rec.stop(); }catch(e){} },
+      attach:function(){
+        var self=this;
+        rec.onresult=function(ev){
+          var fin="", part="";
+          for(var i=ev.resultIndex;i<ev.results.length;i++){
+            var t=ev.results[i][0].transcript;
+            if(ev.results[i].isFinal) fin+=t; else part+=t;
+          }
+          if(fin && self.onFinal) self.onFinal(fin);
+          if(part && self.onPartial) self.onPartial(part);
+        };
+        rec.onerror=function(ev){ if(self.onEnd) self.onEnd(ev.error); };
+        rec.onend=function(){ if(self.onEnd) self.onEnd(null); };
+      }
+    };
+  }
+
+  var ask=document.getElementById("ask"),
+      mic=document.getElementById("mic"),
+      go=document.getElementById("go"),
+      listening=document.getElementById("listening"),
+      listenTxt=document.getElementById("listenTxt"),
+      fieldfoot=document.getElementById("fieldfoot"),
+      phases=document.getElementById("phases"),
+      phnow=document.getElementById("phnow"),
+      notice=document.getElementById("notice");
+
+  var voice=createVoice(), on=false, settled="";
+
+  if(!voice){
+    mic.disabled=true;
+    mic.title="Dictation isn't available in this browser";
+  } else {
+    voice.attach();
+    voice.onPartial=function(p){ ask.value=(settled+p).replace(/\s+/g," ").trimStart(); sync(); };
+    voice.onFinal=function(f){ settled=(settled+f+" "); ask.value=settled.replace(/\s+/g," ").trimStart(); sync(); };
+    voice.onEnd=function(err){
+      if(!on) return;
+      on=false; mic.setAttribute("aria-pressed","false");
+      listening.classList.remove("on");
+      if(err==="not-allowed"||err==="service-not-allowed"){
+        listenTxt.textContent="mic permission denied";
+        listening.classList.add("on");
+        setTimeout(function(){ listening.classList.remove("on"); },2600);
+      } else if(ask.value.trim()){
+        fieldfoot.classList.add("on");
+        ask.focus();
+        ask.setSelectionRange(ask.value.length, ask.value.length);
+      }
+    };
+    mic.addEventListener("click",function(){
+      if(on){ on=false; mic.setAttribute("aria-pressed","false"); listening.classList.remove("on"); voice.stop(); return; }
+      on=true; settled=ask.value?ask.value.replace(/\s*$/," "):"";
+      mic.setAttribute("aria-pressed","true");
+      listenTxt.textContent="listening…";
+      listening.classList.add("on");
+      fieldfoot.classList.remove("on");
+      voice.start();
+    });
+  }
+
+  function sync(){ go.disabled = ask.value.trim().length===0; }
+  ask.addEventListener("input",function(){ sync(); fieldfoot.classList.remove("on"); });
+  sync();
+
+  /* ---------- phase strip ---------- */
+  var LABELS=["reading the brief…","searching 14 sources…","trying to kill the top pick…","writing it up…"],
+      marks=[].slice.call(document.querySelectorAll(".ph")), timer=null;
+
+  function runPhases(){
+    if(timer) return;
+    marks.forEach(function(m){ m.className="ph"; m.querySelector(".mark").textContent="○"; });
+    phases.classList.add("on"); notice.classList.remove("on");
+    var i=0;
+    function step(){
+      if(i>0){ marks[i-1].className="ph done"; marks[i-1].querySelector(".mark").textContent="✓"; }
+      if(i>=marks.length){
+        phases.classList.remove("on"); notice.classList.add("on"); timer=null;
+        notice.scrollIntoView({behavior:"smooth",block:"nearest"});
+        return;
+      }
+      marks[i].className="ph active";
+      marks[i].querySelector(".mark").textContent="●";
+      phnow.textContent=LABELS[i];
+      i++; timer=setTimeout(step, 850);
+    }
+    step();
+  }
+
+  go.addEventListener("click",function(){
+    if(!ask.value.trim()) return;
+    fieldfoot.classList.remove("on");
+    ask.blur();
+    runPhases();
+  });
+  ask.addEventListener("keydown",function(e){
+    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); if(!go.disabled) go.click(); }
+  });
+
+  /* ---------- verdict taps ---------- */
+  var COPY={
+    kept:{w:"1.0",  s:"kept_and_reused", t:"strongest signal in the system"},
+    returned:{w:"−0.8", s:"returned", t:"overrides the purchase before it — he'll ask fit, quality or taste"},
+    skipped:{w:"—", s:"skipped", t:"was it the options, the price, or the brief?"}
+  };
+  var KEY="prime.verdicts.v1";
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ return {}; } }
+  function save(o){ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} }
+
+  var state=load();
+
+  [].slice.call(document.querySelectorAll(".ep[data-ep]")).forEach(function(ep){
+    var id=ep.getAttribute("data-ep"),
+        sig=ep.querySelector(".signal"),
+        taps=[].slice.call(ep.querySelectorAll(".tap"));
+    if(!taps.length) return;
+
+    function paint(v){
+      taps.forEach(function(t){ t.setAttribute("aria-pressed", String(t.getAttribute("data-v")===v)); });
+      if(v && COPY[v]){
+        sig.innerHTML='logged <b>'+COPY[v].s+'</b> · weight '+COPY[v].w+'<br>'+COPY[v].t;
+        sig.classList.add("on");
+      } else { sig.classList.remove("on"); }
+    }
+    taps.forEach(function(t){
+      t.addEventListener("click",function(){
+        var v=t.getAttribute("data-v");
+        if(state[id]===v){ delete state[id]; v=null; } else { state[id]=v; }
+        save(state); paint(v);
+      });
+    });
+    paint(state[id]);
+  });
+})();
+</script>
