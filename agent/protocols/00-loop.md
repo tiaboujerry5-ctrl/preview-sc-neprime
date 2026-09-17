@@ -45,6 +45,16 @@ the recommendation was.
 - **Watchlist hit** — a tracked item crosses its trigger → skip to phase 3 with a
   one-line dossier. Phases 1–2 already happened when it went on the list.
 
+## Out of band
+
+Two things run outside the per-request loop:
+
+- **`06-audit.md`** — every ~10 episodes, tries to falsify the highest-confidence
+  preferences. The only thing in the system that makes the profile *less* sure,
+  and the main defence against drift under passive capture.
+- **`wants.yaml`** — standing low-urgency wants, resolved opportunistically when
+  he's already researching something adjacent. Never a full loop, never a list.
+
 ## Concurrency
 
 Phase 2 fans out. `scout` and `appraiser` run in parallel across source tiers

@@ -1,0 +1,53 @@
+# Cross-category decision traits — how you decide, independent of what you're deciding.
+#
+# This file is the reason a general researcher beats six narrow ones. Category
+# taste doesn't transfer: liking olive tells him nothing about hotels. But how you
+# trade price against quality, how you feel about an unknown vendor, and whether
+# you'd rather wait six weeks or pay 30% more are STABLE FACTS ABOUT YOU, and
+# every episode in every domain is evidence for them.
+#
+# Ten episodes across six domains teach him more about how you decide than ten
+# jacket episodes would.
+#
+# Same record shape as preferences: evidence, confidence, decay.
+# See schemas/preference.schema.json.
+
+traits: []
+
+# The traits he's watching for, and what reveals each one:
+#
+#   price_vs_quality        Which loses when they conflict.
+#                           Revealed by: choosing above or below the target price
+#                           when both options cleared the gates.
+#
+#   vendor_risk_tolerance   Unknown seller at -20%, or known name at full price.
+#                           Transfers directly from marketplaces to contractors.
+#
+#   time_vs_money           Pay more to have it now, or wait six weeks to save 30%.
+#                           One of the most stable traits, and one of the most useful.
+#
+#   optionality_premium     What you'll pay for a refundable fare, a longer return
+#                           window, a month-to-month plan. Predicts your whole
+#                           posture on irreversible decisions.
+#
+#   research_appetite       Do you want the one answer, or the reasoning?
+#                           Revealed by which questions you ask back.
+#
+#   novelty_vs_proven       First-generation product, or the boring version that
+#                           definitely works.
+#
+#   spec_sensitivity        Do marginal spec improvements actually change your
+#                           choice, or do you top out early? Prevents him from
+#                           over-researching things you'd have decided in a minute.
+#
+# Shape reference:
+# - trait: time_vs_money
+#   value: "will wait up to ~3 weeks to save >25%, not longer"
+#   confidence: 0.55
+#   evidence:
+#     - { episode: 2026-09-17-fall-jacket, signal: chose_over, date: 2026-09-17,
+#         note: "Rejected the 6-week backorder at -30%" }
+#     - { episode: 2026-09-02-monitor,     signal: purchased,  date: 2026-09-02,
+#         note: "Paid full price for in-stock over a 2-week wait at -15%" }
+#   last_confirmed: 2026-09-17
+#   decay_after_days: 540     # longer than taste — these traits move slowly

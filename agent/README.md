@@ -59,15 +59,30 @@ you cannot inspect and correct is memory that silently rots.
 | `ACCESS.md` | Accounts, API keys, data sources — the honest version |
 | `METRICS.md` | How we prove he's getting better, not just busier |
 | `ROADMAP.md` | Build order, phase 0 → 3 |
-| `profile/` | The taste model. The actual product. |
+| `INTERFACE.md` | The minimal UI + voice spec — speak or type |
+| `taxonomy/` | Six domains, and the depth tiering that spans cable→contractor |
+| `profile/` | The taste model **and** the decision traits. The actual product. |
 | `protocols/` | The loop, step by step. Read `00-loop.md` first. |
 | `schemas/` | Machine-checkable shapes: brief, finding, preference, verdict |
 | `roster/` | The five sub-agents and their single responsibilities |
-| `memory/` | Episodes (case files), verdicts (outcomes), watchlist (price tracking) |
+| `wants.yaml` | Standing low-urgency wants, resolved opportunistically |
+| `memory/` | Episodes, verdicts, watchlist, audits |
 
 ## Reading order
 
 1. `protocols/00-loop.md` — the spine
-2. `protocols/01-intake.md` — why he asks few questions and they get fewer
-3. `protocols/04-learning.md` — the anti-drift machinery, the hard part
-4. `CHARTER.md` — what he's allowed to do without asking
+2. `taxonomy/README.md` — why one framework covers a jacket and a roofer
+3. `protocols/01-intake.md` — why he asks few questions and they get fewer
+4. `protocols/04-learning.md` — the anti-drift machinery, the hard part
+5. `protocols/05-verdict.md` — how he learns without ever nagging you
+6. `CHARTER.md` — what he's allowed to do without asking
+
+## Settled
+
+| Decision | Choice |
+|---|---|
+| **Autonomy** | **L1** — researches, tracks, holds accounts, builds carts. Never spends |
+| **Scope** | **Everything** — goods, travel, services, subscriptions, experiences, knowledge |
+| **Feedback** | **Passive** — you volunteer outcomes; he mines conversation and never nags |
+| **Runtime** | **Repo-native** — git is the memory substrate |
+| **Interface** | **Minimal** — one input, type or speak. See `INTERFACE.md` |

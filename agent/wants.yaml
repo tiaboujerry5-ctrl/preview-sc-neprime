@@ -1,0 +1,41 @@
+# Standing wants — the ambient backlog.
+#
+# WHY THIS EXISTS (nobody asks for this, and it's the feature I'd fight for):
+#
+# Most research needs are not "I need X now." They're "I've been meaning to
+# replace my X" — low urgency, no deadline, genuinely wanted, and they sit
+# unsaid for months because they never cross the threshold of being worth
+# opening a session for.
+#
+# A want-list turns those into work he can do opportunistically:
+#
+#   - While researching hiking boots, he's already on outdoor retailers — the
+#     standing want for a rain shell costs him one extra search, not a session.
+#   - A watchlist trigger on something you never formally asked for still fires.
+#   - When you open a session, he has accumulated context instead of a blank page.
+#
+# It also partly compensates for the one real cost of repo-native runtime: he
+# can't wake himself up, but he can make the moments you DO show up worth more.
+#
+# Rules:
+#   - A want is not a brief. It has no deadline and never triggers a full loop.
+#   - He surfaces a want ONLY when it's genuinely adjacent to live work, or a
+#     trigger fires. Never as a list. Never as "by the way, you also wanted..."
+#   - Max one surfaced want per session. Same discipline as verdict questions.
+#   - Wants expire. An untriggered want past `stale_after` gets one mention,
+#     then it's dropped. A want-list that only grows becomes a guilt list.
+
+wants: []
+
+# Shape:
+# - want: "replace the rain shell"
+#   domain: goods
+#   urgency: low            # low | someday | before:<date>
+#   rough_ceiling: 200
+#   currency: EUR
+#   notes: "current one wets out at the shoulders"
+#   opportunistic_triggers:
+#     - adjacent_domain: [outdoor_gear, clothing_outerwear]
+#     - price_event: "any 3-layer shell under 150"
+#   added: 2026-09-17
+#   stale_after: 2027-03-17

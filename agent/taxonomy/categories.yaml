@@ -1,0 +1,98 @@
+# Encoded taxonomy. Gates, weights and irreversibility per category.
+# irreversibility: 0.0 = trivially undone, 1.0 = permanent.
+# Combined with normalized cost it sets research depth. See README.md.
+
+depth_thresholds:
+  quick: 0.15        # one pass, one line, no dossier
+  standard: 0.55     # the full loop
+  # above 0.55 -> deep: second skeptic pass, failure-mode analysis, cooling-off
+
+# Cost normalization is relative to YOUR bands, not absolute money.
+# A 300 EUR spend means something different per domain; this is what makes
+# the depth score comparable across a jacket and a plumber.
+cost_normalization:
+  basis: per_category_ceiling
+  formula: "min(1.0, estimated_cost / category.budget.ceiling)"
+
+domains:
+
+  goods:
+    irreversibility: 0.2          # returns exist; the return window IS the real test
+    gates: [size_available, ships_to_locale, within_ceiling, returns_min_days, arrives_before_deadline]
+    value_anchor: item_90d_median
+    weights: { taste: 0.35, value: 0.25, quality: 0.20, timing: 0.05, risk: 0.15 }
+    finding_ttl_hours: 72
+    subcategories:
+      clothing_outerwear: { irreversibility: 0.2, weights: { taste: 0.30, value: 0.20, quality: 0.30, timing: 0.05, risk: 0.15 } }
+      clothing_basics:    { irreversibility: 0.15, weights: { taste: 0.25, value: 0.40, quality: 0.20, timing: 0.05, risk: 0.10 } }
+      footwear:           { irreversibility: 0.25, weights: { taste: 0.25, value: 0.15, quality: 0.30, timing: 0.05, risk: 0.25 },
+                            note: "Highest fit risk in goods. Return policy is a gate, not a score." }
+      electronics:        { irreversibility: 0.3, weights: { taste: 0.10, value: 0.30, quality: 0.30, timing: 0.20, risk: 0.10 },
+                            note: "Release cycles are predictable - timing weighted up sharply." }
+      home_furniture:     { irreversibility: 0.5, weights: { taste: 0.35, value: 0.20, quality: 0.25, timing: 0.05, risk: 0.15 },
+                            note: "Return shipping on bulky items often exceeds the discount. Effectively semi-final." }
+
+  travel:
+    irreversibility: 0.7          # refundable fares cost more than the risk they remove
+    gates: [dates_available, within_ceiling, cancellation_terms, total_journey_time, baggage_included]
+    value_anchor: route_fare_calendar
+    weights: { taste: 0.20, value: 0.30, quality: 0.20, timing: 0.25, risk: 0.05 }
+    finding_ttl_hours: 24         # prices move hourly - a 3-day-old fare is fiction
+    rules:
+      - "Always price the refundable option alongside. State the delta as the cost of optionality."
+      - "Total landed cost: bags, seats, transfers, resort fees. Base fare is marketing."
+      - "Timing is weighted highest of any domain. 'Book Tuesday' is a real finding."
+
+  services:
+    irreversibility: 0.9          # you cannot return labour. The defining fact of this domain
+    gates: [licensed, insured, available_in_window, within_ceiling, written_quote, references_checkable]
+    value_anchor: local_quote_range
+    weights: { taste: 0.05, value: 0.20, quality: 0.35, timing: 0.05, risk: 0.35 }
+    finding_ttl_hours: 336        # quotes are stable; availability is not
+    rules:
+      - "Risk weight is the highest in the taxonomy. Bad work costs more to undo than to do."
+      - "Minimum three quotes before any recommendation. Non-negotiable."
+      - "Licence and insurance are gates, verified at source, never taken from the listing."
+      - "The cheapest quote is a risk flag, not a win. Price it against the local range."
+      - "Deep tier by default above the quick threshold - skip the depth calc."
+
+  subscriptions:
+    irreversibility: 0.4          # cancellable, but the cost is the tail you forget
+    gates: [cancellation_path_exists, no_multi_year_lock_in, data_export_available, within_monthly_ceiling]
+    value_anchor: cost_per_actual_use
+    weights: { taste: 0.15, value: 0.40, quality: 0.25, timing: 0.05, risk: 0.15 }
+    finding_ttl_hours: 720
+    rules:
+      - "Quote the ANNUAL cost, always. Monthly pricing exists to hide the number."
+      - "Estimate usage honestly from prior episodes. Cost-per-use beats cost."
+      - "Find the cancellation path BEFORE recommending. If it's hard to leave, that's the finding."
+      - "Auto-add to watchlist with a renewal-date trigger."
+
+  experiences:
+    irreversibility: 0.6          # a specific night, usually non-refundable
+    gates: [date_available, within_ceiling, refundable_or_transferable, location_reachable]
+    value_anchor: comparable_options_same_slot
+    weights: { taste: 0.50, value: 0.20, quality: 0.20, timing: 0.05, risk: 0.05 }
+    finding_ttl_hours: 48
+    rules: ["Taste-dominant. The decision profile matters more than price here."]
+
+  knowledge:
+    irreversibility: 0.0          # nothing is bought
+    gates: []
+    weights: null                 # no scoring - this domain produces an answer, not a pick
+    finding_ttl_hours: 2160
+    rules:
+      - "Runs intake -> research -> written answer. Skips judgment and verdict."
+      - "Same provenance rules: claims carry sources, disagreement between sources is reported, not averaged."
+      - "The failure mode here is a confident wrong answer. State confidence explicitly."
+      - "No verdict phase - but a follow-up question in the same area IS feedback on the answer."
+
+# Escalate regardless of domain or depth.
+always_escalate:
+  - recurring_charge_over_annual_ceiling
+  - final_sale_no_returns
+  - unpriced_cross_border_duties
+  - used_or_refurbished
+  - any_service_without_written_quote
+  - deposit_required_before_work_begins
+  - contract_longer_than_12_months

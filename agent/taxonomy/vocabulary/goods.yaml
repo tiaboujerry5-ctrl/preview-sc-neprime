@@ -1,0 +1,7 @@
+# Seeded from the worked example only. Real entries come from episodes.
+domains:
+  clothing_outerwear:
+    terms: [chore jacket, overshirt, waxed cotton, field jacket, unlined shell]
+    anti_terms: [tactical, performance, activewear]   # drag toward technical outerwear
+    quality_markers: [full-grain, ventile, 4-ply waxed, taped seams, YKK]
+    disambiguators: ["shell (garment) not shell (company)"]

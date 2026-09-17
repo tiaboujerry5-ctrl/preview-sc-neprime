@@ -32,13 +32,19 @@ answer, and the answer is a list of episodes you can go read.
 
 | Signal | Weight | Why |
 |---|---|---|
-| `kept_and_reused` | **1.0** | Revealed preference over time. The gold standard |
+| `kept_and_reused` | **1.0** | Revealed preference over time. The gold standard — and, under passive capture, rare |
+| `chose_over` | **0.7** | A choice between real options he put in front of you. **Arrives free on every episode** |
 | `purchased` | 0.7 | Money is a real signal, but returns happen |
-| `chose_over` | 0.6 | A choice between real options. Grounded |
 | `rejected` | 0.6 | Negative preference is as valuable, and rarer |
-| `stated` | 0.4 | People misdescribe their own taste, constantly |
 | `probe_answer` | 0.5 | A pointed-at choice beats a described one |
+| `stated` | 0.4 | People misdescribe their own taste, constantly |
 | `returned` | **-0.8** | Strong negative. Overrides the purchase that preceded it |
+
+`chose_over` is weighted up from the usual 0.6 because of the passive-capture
+decision in `05-verdict.md`: outcome signals are scarce here, so the signal he
+observes *at decision time* — which needs nothing from you — has to carry more.
+It is still capped below `kept_and_reused`, because picking a thing and living
+with it are different facts.
 
 **Stated preference is weighted below revealed preference on purpose.** What
 someone says they like and what they keep wearing are different datasets, and the
@@ -47,15 +53,18 @@ second one is the true one.
 ## Confidence math
 
 ```
-confidence = clamp(Σ(signal_weight × recency_factor) / (N + 1.5), 0, 0.95)
+confidence = clamp(Σ(signal_weight × recency_factor) / (N + 2.0), 0, 0.95)
 recency_factor = 0.5 ^ (days_since / 365)
 ```
 
 Three properties, each deliberate:
 
 - **Capped at 0.95.** Nothing is ever certain. Leaves room to be wrong.
-- **The `+1.5` denominator penalizes thin evidence.** One strong signal lands
-  around 0.4, not 1.0. **One confirmation is a rumor.**
+- **The `+2.0` denominator penalizes thin evidence.** One strong signal lands
+  around 0.33, not 1.0. **One confirmation is a rumor.** Raised from 1.5 under
+  passive capture: with fewer outcome signals to correct a wrong preference, the
+  cost of hardening early is higher, so preferences take 4–5 episodes to reach
+  actionable confidence instead of 3. Slower, and more honest.
 - **Recency halves yearly.** Taste moves. A 2024 preference shouldn't outvote a
   2026 one.
 
@@ -81,6 +90,31 @@ A preference not reconfirmed within `decay_after_days` drops to confidence 0.2
 and is marked `stale`. Stale preferences still inform scoring, weakly, and become
 **cheap probe material**: "still avoiding synthetics, or has that relaxed?" One
 question, re-hardens a whole branch of the model.
+
+## Two models, learned differently
+
+Since he researches everything — jackets, flights, contractors, subscriptions —
+there are two distinct things to learn, and conflating them would wreck both.
+
+**Category taste** → `profile/taste/`
+Domain-bound and non-transferable. Liking olive tells him nothing about hotels.
+Only evidence from the same domain counts. Decays in ~270 days.
+
+**Decision traits** → `profile/decision-profile.yaml`
+How you decide, regardless of what. Price-vs-quality, vendor risk tolerance,
+time-vs-money, what you'll pay for optionality. **Every episode in every domain
+is evidence**, and these are the traits that make him useful in a domain he has
+never seen you buy in before. Decays in ~540 days — they move slowly.
+
+The practical effect: after five episodes spread across goods, travel and
+services, he can make a decent first pass at a category he's never touched,
+because he knows you'd rather wait three weeks than pay 30% more. That is the
+whole argument for the general researcher over six narrow ones.
+
+Rule: never promote a category taste preference into a decision trait. "Prefers
+natural materials" is not "risk-averse about new technology," however much the
+pattern-match tempts. Traits are earned from decision *structure* — what was
+traded against what — not from the content of the choice.
 
 ## What he must never learn
 

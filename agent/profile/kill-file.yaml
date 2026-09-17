@@ -1,0 +1,31 @@
+# Hard exclusions, with reasons. Never suggest these again.
+#
+# Distinct from a negative preference: a preference is a weighted score term that
+# decays and can be argued with. A kill-file entry is a GATE, it does not decay,
+# and it is usually earned by something going wrong once.
+#
+# This exists because the most annoying failure of a recommender is re-suggesting
+# the thing that already burned you. A preference at 0.6 confidence will happily
+# resurface a seller who lost your package, because 0.6 is not a veto. This is
+# the veto.
+#
+# Only two ways in:
+#   1. You say so directly.
+#   2. A verdict with a concrete failure (returned/damaged/never-arrived/bad work).
+#      He proposes the entry; it lands only with your yes.
+#
+# Every entry carries its reason, so it can be revisited — a brand under new
+# ownership, a seller who fixed their fulfilment. Permanent, not unexaminable.
+
+sellers: []
+brands: []
+products: []
+services: []
+
+# Shape:
+# - name: "Corso Marketplace Reseller"
+#   scope: seller
+#   reason: "Shipped the wrong size twice, refused the second return"
+#   episode: 2026-09-17-fall-jacket
+#   added: 2026-09-17
+#   revisit_if: "brand-direct option appears"
