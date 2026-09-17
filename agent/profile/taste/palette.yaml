@@ -1,0 +1,17 @@
+# Color preferences as evidence-backed records. See schemas/preference.schema.json
+# Seeded empty on purpose: a taste model invented before any evidence is fiction,
+# and fiction at confidence 0.5 is worse than an empty file.
+
+preferences: []
+
+# Shape reference:
+# - subject: color
+#   value: "warm neutrals (camel, olive, rust)"
+#   scope: "outerwear"          # conditional preferences come from contested flags
+#   polarity: positive
+#   confidence: 0.62
+#   evidence:
+#     - { episode: 2026-09-17-fall-jacket, signal: chose_over, date: 2026-09-17 }
+#     - { episode: 2026-08-02-knitwear,    signal: stated,     date: 2026-08-02 }
+#   last_confirmed: 2026-09-17
+#   decay_after_days: 270

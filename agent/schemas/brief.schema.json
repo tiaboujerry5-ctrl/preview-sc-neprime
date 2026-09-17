@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Brief",
+  "description": "The contract produced by intake. Research may not begin until every field is set, resolved from the profile, or explicitly assumed.",
+  "type": "object",
+  "required": ["episode_id", "request", "object_class", "budget", "constraints", "assumptions", "created_at"],
+  "properties": {
+    "episode_id": { "type": "string", "examples": ["2026-09-17-fall-jacket"] },
+    "request": { "type": "string", "description": "The principal's ask, verbatim" },
+    "object_class": { "type": "string", "description": "Resolved category. 'jacket' is not a class; 'unlined cotton overshirt' is." },
+    "budget": {
+      "type": "object",
+      "required": ["target", "ceiling", "walk_away", "currency"],
+      "properties": {
+        "target": { "type": "number", "description": "Anchor for value scoring" },
+        "ceiling": { "type": "number", "description": "Hard gate" },
+        "walk_away": { "type": "number", "description": "Escalate above this even if perfect" },
+        "currency": { "type": "string" },
+        "includes_landed_cost": { "type": "boolean", "default": true, "description": "Whether caps include shipping/duties/returns" }
+      }
+    },
+    "deadline": { "type": ["string", "null"], "format": "date" },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "operator", "value", "hardness"],
+        "properties": {
+          "field": { "type": "string", "examples": ["size", "material", "ships_to", "brand"] },
+          "operator": { "enum": ["eq", "neq", "in", "not_in", "lte", "gte", "contains"] },
+          "value": {},
+          "hardness": { "enum": ["hard", "soft"], "description": "hard = binary gate; soft = weighted score term" },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "Soft constraints only" },
+          "source": { "enum": ["stated", "profile", "assumed"] }
+        }
+      }
+    },
+    "use_context": {
+      "type": "object",
+      "description": "Drives material and cut more reliably than stated style preference",
+      "properties": {
+        "setting": { "type": "string" },
+        "frequency": { "type": "string" },
+        "layered_over": { "type": "string" },
+        "climate": { "type": "string" }
+      }
+    },
+    "trade_off_priority": {
+      "type": "array",
+      "items": { "enum": ["price", "quality", "exact_taste_match", "speed", "sustainability"] },
+      "description": "Ordered. Resolves conflicts without a new question."
+    },
+    "assumptions": {
+      "type": "array",
+      "description": "Every unasked variable. Restated at the top of the dossier.",
+      "items": {
+        "type": "object",
+        "required": ["field", "assumed_value", "basis"],
+        "properties": {
+          "field": { "type": "string" },
+          "assumed_value": {},
+          "basis": { "enum": ["profile", "category_default", "prior_episode", "inference"] },
+          "confidence": { "type": "number" }
+        }
+      }
+    },
+    "questions_asked": {
+      "type": "array",
+      "description": "Tracked for the questions-per-brief metric. Should trend toward zero.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": { "type": "string" },
+          "answer": { "type": "string" },
+          "round": { "type": "integer", "maximum": 2 },
+          "profile_should_have_known": { "type": "boolean", "description": "true = a defect. Feeds the learning phase." }
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

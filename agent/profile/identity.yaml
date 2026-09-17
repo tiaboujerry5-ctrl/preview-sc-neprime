@@ -1,0 +1,33 @@
+# Principal-owned. PRIME proposes edits here; he never writes them himself.
+# Precision rule: enough to research accurately, no more.
+
+principal:
+  locale: null            # e.g. "FR" — drives currency, shipping, duties
+  currency: null
+  city: null              # city + postal prefix only. Never a street address.
+  climate: null           # drives material weight far more than stated preference
+  timezone: null
+
+sizing:
+  # Real measurements beat labels — brand sizing is not comparable.
+  # Fill what you know; he'll learn the rest from verdicts.
+  tops:
+    label: null           # e.g. "M"
+    chest_cm: null
+    shoulder_cm: null
+    sleeve_cm: null
+    fit_preference: null  # slim | regular | relaxed | oversized
+  bottoms:
+    waist_cm: null
+    inseam_cm: null
+    fit_preference: null
+  shoes:
+    eu: null
+    us: null
+    width: null           # narrow | standard | wide
+  known_fit_issues: []    # e.g. "sleeves always long", "wide in the shoulders"
+                          # These are worth more than any size label.
+
+hard_avoid:
+  materials: []           # allergies, refusals
+  brands: []              # ethical or personal exclusions

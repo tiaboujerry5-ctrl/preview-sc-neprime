@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verdict",
+  "description": "What actually happened. The only ground truth in the system — every confidence score ultimately traces back to one of these.",
+  "type": "object",
+  "required": ["episode_id", "outcome", "recorded_at"],
+  "properties": {
+    "episode_id": { "type": "string" },
+    "outcome": {
+      "enum": ["bought_pick", "bought_alternate", "bought_elsewhere", "skipped", "returned", "kept_and_reused", "kept_and_regret", "unknown"]
+    },
+    "item": { "type": ["string", "null"] },
+    "price_paid": { "type": ["number", "null"], "description": "vs. the quoted price — feeds the price-accuracy watch metric" },
+    "quoted_price": { "type": ["number", "null"] },
+    "reason": { "type": ["string", "null"], "description": "For skipped/returned/bought_elsewhere. The most valuable field on this object." },
+    "search_gap": {
+      "type": ["string", "null"],
+      "description": "bought_elsewhere only: what the search missed. Usually a vocabulary gap — becomes a permanent addition to the category's search terms."
+    },
+    "return_reason": { "enum": ["fit", "quality", "taste", "changed_mind", "arrived_damaged", null] },
+    "checkin_stage": { "enum": ["T+3", "T+14", "T+45", "volunteered"] },
+    "asks_made": { "type": "integer", "maximum": 2, "description": "Two unanswered asks → outcome is 'unknown'. Never inferred from silence." },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

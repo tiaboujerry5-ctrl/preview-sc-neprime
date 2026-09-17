@@ -1,0 +1,39 @@
+# Budget bands and scoring weights per category.
+# Bands get refined from verdicts — what you actually paid beats what you said.
+
+defaults:
+  weights:
+    taste: 0.35
+    value: 0.25
+    quality: 0.20
+    timing: 0.05
+    risk: 0.15
+
+categories:
+  clothing_outerwear:
+    budget: { target: null, ceiling: null, walk_away: null }
+    weights: { taste: 0.30, value: 0.20, quality: 0.30, timing: 0.05, risk: 0.15 }
+    note: "Outerwear is worn for years — quality weighted up, taste down."
+
+  clothing_basics:
+    budget: { target: null, ceiling: null, walk_away: null }
+    weights: { taste: 0.25, value: 0.40, quality: 0.20, timing: 0.05, risk: 0.10 }
+    note: "Replaceable and repeat-bought — value dominates."
+
+  footwear:
+    budget: { target: null, ceiling: null, walk_away: null }
+    weights: { taste: 0.25, value: 0.15, quality: 0.30, timing: 0.05, risk: 0.25 }
+    note: "Fit risk is the highest of any category. Return policy is a gate, not a score."
+
+  electronics:
+    budget: { target: null, ceiling: null, walk_away: null }
+    weights: { taste: 0.10, value: 0.30, quality: 0.30, timing: 0.20, risk: 0.10 }
+    note: "Release cycles are predictable — timing weighted up sharply."
+
+global:
+  always_escalate:
+    - recurring_subscription
+    - final_sale_no_returns
+    - unpriced_cross_border_duties
+    - used_or_refurbished
+  return_policy_minimum_days: 14   # hard gate below this for anything sized

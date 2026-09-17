@@ -1,0 +1,11 @@
+# Brand affinity, evidence-backed. Same decay and contest rules as all preferences.
+# Note: brand affinity is the preference most prone to drift — it hardens from a
+# single good experience and then quietly narrows the whole search. Keep the
+# confidence honest and let it decay.
+
+preferences: []
+
+# Also tracked per brand once evidence exists:
+#   fit_delta:   "runs one size small in the shoulders"   <- from T3 + returns
+#   quality_verdict: "held up 2 years" | "pilled in 3 months"
+#   seller_trust: last known return experience

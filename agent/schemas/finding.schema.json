@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Finding",
+  "description": "One candidate. Appended to findings.jsonl, one per line, append-only. Rejects are kept — they are the 'why not' list and they prevent re-suggesting what was already turned down.",
+  "type": "object",
+  "required": ["id", "name", "source_tier", "url", "retrieved_at", "status"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "brand": { "type": ["string", "null"] },
+    "source_tier": { "enum": ["T0", "T1", "T2", "T3", "T4"] },
+    "url": { "type": "string", "format": "uri" },
+    "retrieved_at": { "type": "string", "format": "date-time", "description": "No price claim is valid without this. Re-verify if older than 72h." },
+    "status": { "enum": ["candidate", "qualified", "rejected", "near_miss", "blocked"] },
+    "rejection_reason": { "type": ["string", "null"] },
+    "failed_gate": { "type": ["string", "null"], "description": "For near_miss: the single gate that failed" },
+    "price": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": ["number", "null"] },
+        "currency": { "type": "string" },
+        "list_price": { "type": ["number", "null"], "description": "For detecting discount theater" },
+        "median_90d": { "type": ["number", "null"], "description": "The real anchor for value scoring" },
+        "observed_floor": { "type": ["number", "null"] },
+        "landed_estimate": { "type": ["number", "null"], "description": "Incl. shipping, duties, return shipping" },
+        "corroborating_sources": { "type": "integer", "minimum": 0, "description": "Independent ownership. Three affiliate mirrors count as one." }
+      }
+    },
+    "availability": {
+      "type": "object",
+      "properties": {
+        "in_stock": { "type": ["boolean", "null"] },
+        "sizes_available": { "type": "array", "items": { "type": "string" } },
+        "ships_to": { "type": "array", "items": { "type": "string" } },
+        "eta_days": { "type": ["integer", "null"], "description": "Realistic, not best-case" }
+      }
+    },
+    "attributes": { "type": "object", "description": "Category-specific. Unknown stays null — never invent a spec to fill a field.", "additionalProperties": true },
+    "community_signals": {
+      "type": "array",
+      "description": "T3 evidence. Where real sizing and durability truth lives.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": { "type": "string" },
+          "url": { "type": "string" },
+          "sentiment": { "enum": ["positive", "negative", "mixed"] },
+          "corroborations": { "type": "integer" }
+        }
+      }
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": { "enum": ["unknown_seller", "no_returns", "final_sale", "thin_reviews", "sizing_variance", "dropship_signals", "authenticity_doubt", "price_anomaly"] }
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "taste": { "type": "number" }, "value": { "type": "number" },
+        "quality": { "type": "number" }, "timing": { "type": "number" },
+        "risk": { "type": "number" }, "total": { "type": "number" }
+      }
+    }
+  }
+}

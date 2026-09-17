@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Preference",
+  "description": "A learned taste fact. Never a bare string — always carries evidence and confidence, so 'why do you think that?' always has an answer.",
+  "type": "object",
+  "required": ["subject", "value", "polarity", "confidence", "evidence", "last_confirmed"],
+  "properties": {
+    "subject": { "type": "string", "examples": ["color", "silhouette", "material", "brand", "price_sensitivity"] },
+    "value": { "type": "string" },
+    "scope": { "type": ["string", "null"], "description": "Conditional preferences: 'outerwear only'. Usually discovered by resolving a contested flag." },
+    "polarity": { "enum": ["positive", "negative", "contested"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 0.95, "description": "Capped at 0.95. Nothing is certain." },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["episode", "signal"],
+        "properties": {
+          "episode": { "type": "string" },
+          "signal": { "enum": ["kept_and_reused", "purchased", "chose_over", "rejected", "stated", "probe_answer", "returned"] },
+          "note": { "type": "string" },
+          "date": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "contested_by": { "type": "array", "items": { "type": "string" }, "description": "Episodes providing opposing evidence. Never resolved silently." },
+    "last_confirmed": { "type": "string", "format": "date" },
+    "decay_after_days": { "type": "integer", "default": 270 },
+    "stale": { "type": "boolean", "default": false }
+  }
+}

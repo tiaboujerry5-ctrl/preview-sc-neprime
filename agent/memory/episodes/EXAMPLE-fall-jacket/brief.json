@@ -1,0 +1,32 @@
+{
+  "episode_id": "EXAMPLE-fall-jacket",
+  "request": "I need a jacket for fall",
+  "object_class": "unlined mid-weight casual jacket (chore/overshirt family)",
+  "budget": { "target": 180, "ceiling": 260, "walk_away": 320, "currency": "EUR", "includes_landed_cost": true },
+  "deadline": "2026-10-15",
+  "constraints": [
+    { "field": "size",     "operator": "eq",     "value": "M / chest 102cm", "hardness": "hard", "source": "profile" },
+    { "field": "ships_to", "operator": "eq",     "value": "FR",              "hardness": "hard", "source": "profile" },
+    { "field": "returns",  "operator": "gte",    "value": 14,                "hardness": "hard", "source": "profile" },
+    { "field": "material", "operator": "not_in", "value": ["polyester_shell"], "hardness": "soft", "weight": 0.6, "source": "assumed" },
+    { "field": "color",    "operator": "in",     "value": ["olive", "camel", "navy", "charcoal"], "hardness": "soft", "weight": 0.5, "source": "assumed" }
+  ],
+  "use_context": {
+    "setting": "daily city wear, occasional office",
+    "frequency": "3-4x/week",
+    "layered_over": "knitwear",
+    "climate": "Paris autumn, 8-16C, frequent light rain"
+  },
+  "trade_off_priority": ["quality", "exact_taste_match", "price", "speed"],
+  "assumptions": [
+    { "field": "budget.target", "assumed_value": 180, "basis": "category_default", "confidence": 0.4 },
+    { "field": "layering",      "assumed_value": "must fit over a mid-gauge knit", "basis": "inference", "confidence": 0.7 },
+    { "field": "water_resistance", "assumed_value": "light shower resistance needed", "basis": "inference", "confidence": 0.8 },
+    { "field": "formality",     "assumed_value": "smart-casual, not technical/outdoor", "basis": "prior_episode", "confidence": 0.6 }
+  ],
+  "questions_asked": [
+    { "question": "Over a knit or just a shirt? Changes the size I look for.", "answer": "Over a knit", "round": 1, "profile_should_have_known": false },
+    { "question": "Does it need to handle rain, or is that a separate coat?", "answer": "Light rain, yes", "round": 1, "profile_should_have_known": false }
+  ],
+  "created_at": "2026-09-17T09:14:00Z"
+}
