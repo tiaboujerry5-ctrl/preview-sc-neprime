@@ -1,0 +1,16 @@
+{
+  "name": "prime-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Scheduled runner for the PRIME research agent",
+  "scripts": {
+    "watch": "node src/run.js watch",
+    "audit": "node src/run.js audit",
+    "episode": "node src/run.js episode"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.0"
+  },
+  "engines": { "node": ">=20" }
+}

@@ -63,6 +63,16 @@ Per `INTERFACE.md`, in this order:
   quote-range data for `services`
 - Sub-agents as genuinely parallel agents rather than sequential passes
 
+## Phase 3.5 — The runner *(built)*
+
+`runner/` plus `.github/workflows/prime.yml`. Scheduled jobs on GitHub Actions:
+`watch` daily on Haiku, `audit` monthly on Opus, `episode` on demand. Memory is
+git, so each run commits what it learned and any of it can be reverted.
+
+Needs `ANTHROPIC_API_KEY` as a repo secret and Actions write permission. Seven
+tools, no shell — see `runner/README.md` on why the permission model is tighter
+than an attended session, not looser.
+
 ## Phase 4 — Depth and watchlists
 
 - Watchlist price monitoring with absolute-value triggers

@@ -60,6 +60,7 @@ you cannot inspect and correct is memory that silently rots.
 | `METRICS.md` | How we prove he's getting better, not just busier |
 | `ROADMAP.md` | Build order, phase 0 → 3 |
 | `INTERFACE.md` | The minimal UI + voice spec — speak or type |
+| `runner/` | Headless runner — how he works when you're not here |
 | `taxonomy/` | Six domains, and the depth tiering that spans cable→contractor |
 | `profile/` | The taste model **and** the decision traits. The actual product. |
 | `protocols/` | The loop, step by step. Read `00-loop.md` first. |

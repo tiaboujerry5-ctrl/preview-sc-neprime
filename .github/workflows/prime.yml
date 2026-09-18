@@ -1,0 +1,80 @@
+name: PRIME
+
+# The runner that makes PRIME work when nobody is present.
+# Memory is git, so every run is a commit you can read, diff and revert.
+
+on:
+  schedule:
+    # Watchlist: daily at 07:00 UTC. Prices move overnight.
+    - cron: "0 7 * * *"
+    # Audit: 1st of the month, 08:00 UTC. The falsification pass.
+    - cron: "0 8 1 * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to run"
+        required: true
+        default: watch
+        type: choice
+        options: [watch, audit, episode]
+      request:
+        description: "For episode mode: what are you looking for?"
+        required: false
+        type: string
+
+concurrency:
+  # Two runs writing the profile at once would corrupt it.
+  group: prime-memory
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install runner
+        working-directory: agent/runner
+        run: npm install --no-audit --no-fund
+
+      - name: Pick mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 8 1 * *" ]; then
+            echo "mode=audit" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=watch" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run PRIME
+        working-directory: agent/runner
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          KEEPA_API_KEY: ${{ secrets.KEEPA_API_KEY }}
+        run: node src/run.js "${{ steps.mode.outputs.mode }}" "${{ inputs.request }}"
+
+      - name: Commit what changed
+        run: |
+          git config user.name  "prime[bot]"
+          git config user.email "prime@users.noreply.github.com"
+          # Only ever the memory and profile. The runner must not touch code,
+          # and if it somehow did, this scoping means the commit won't carry it.
+          git add agent/memory agent/profile 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "nothing changed — not committing an empty run"
+            exit 0
+          fi
+          git commit \
+            -m "prime(${{ steps.mode.outputs.mode }}): $(date -u +%Y-%m-%d)" \
+            -m "Automated run. Memory and profile changes only." \
+            -m "Review the diff - profile changes are proposals, not decisions."
+          git push
